@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&family=Sen:wght@400;700;800&display=swap" rel="stylesheet">
+    <title>Watch Movie - Movieshub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #151515;
+            color: white;
+            font-family: 'Roboto', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .navbar {
+            background: #151515;
+            padding: 10px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+        }
+        .navbar-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .logo {
+            color: #e50914;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .menu-list {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+        .menu-list a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .menu-list a:hover {
+            color: #e50914;
+        }
+        .video-container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 80px auto 20px;
+            padding: 20px;
+        }
+        .video-player {
+            width: 100%;
+            aspect-ratio: 16/9;
+            background: #000;
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .video-player video {
+            width: 100%;
+            height: 100%;
+            display: block;
+            object-fit: contain;
+        }
+        .video-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.7));
+            padding: 20px 10px 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .video-player:hover .video-controls {
+            opacity: 1;
+        }
+        .video-controls button {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 5px;
+            transition: transform 0.2s;
+        }
+        .video-controls button:hover {
+            transform: scale(1.1);
+        }
+        .video-progress {
+            flex-grow: 1;
+            height: 5px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+        .video-progress-bar {
+            height: 100%;
+            background: #e50914;
+            border-radius: 2px;
+            width: 0;
+            transition: width 0.1s;
+        }
+        .video-time {
+            color: white;
+            font-size: 0.9em;
+            min-width: 100px;
+            text-align: center;
+            font-family: monospace;
+        }
+        .video-volume {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .video-volume input {
+            width: 100px;
+            -webkit-appearance: none;
+            height: 5px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            outline: none;
+        }
+        .video-volume input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 12px;
+            height: 12px;
+            background: #e50914;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .error-message {
+            color: white;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,0,0,0.3);
+            margin-top: 10px;
+            display: none;
+            border-radius: 4px;
+        }
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.2em;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 4px;
+        }
+        .video-fallback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .video-fallback a {
+            color: #e50914;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .video-fallback a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="navbar-container">
+            <div class="logo-container">
+                <h5 class="logo">Movieshub</h5>
+            </div>
+            <div class="menu-container">
+                <ul class="menu-list">
+                    <li><a href="index.html">HOME</a></li>
+                    <li><a href="series.html">SERIES</a></li>
+                    <li><a href="Movies.html">MOVIES</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="video-container">
+        <div class="video-player">
+            <div class="loading">Loading video...</div>
+            <div class="video-fallback" style="display: none;">
+                <p>Video playback not supported in your browser.</p>
+                <p>Try downloading the video instead:</p>
+                <a href="video/theboys.webm" download>Download Video</a>
+            </div>
+            <video id="videoPlayer" preload="metadata" playsinline controls>
+                <source src="video/theboys.webm" type="video/webm">
+                <source src="video/wednesday2008 Trailer.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+            <div class="video-controls">
+                <button id="playPauseBtn"><i class="bi bi-play-fill"></i></button>
+                <div class="video-progress">
+                    <div class="video-progress-bar"></div>
+                </div>
+                <span class="video-time">0:00 / 0:00</span>
+                <div class="video-volume">
+                    <button id="muteBtn"><i class="bi bi-volume-up-fill"></i></button>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+                </div>
+                <button id="fullscreenBtn"><i class="bi bi-arrows-fullscreen"></i></button>
+            </div>
+        </div>
+        <div class="error-message" id="errorMessage"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded');
+            
+            const video = document.getElementById('videoPlayer');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const muteBtn = document.getElementById('muteBtn');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const progressBar = document.querySelector('.video-progress-bar');
+            const timeDisplay = document.querySelector('.video-time');
+            const errorMessage = document.getElementById('errorMessage');
+            const progressContainer = document.querySelector('.video-progress');
+            const loadingIndicator = document.querySelector('.loading');
+            const fallbackMessage = document.querySelector('.video-fallback');
+
+            // Debug logging
+            console.log('Video element:', video);
+            console.log('Video source:', video.currentSrc);
+
+            // Check if video is supported
+            function checkVideoSupport() {
+                const videoElement = document.createElement('video');
+                const canPlayWebm = videoElement.canPlayType('video/webm');
+                const canPlayMp4 = videoElement.canPlayType('video/mp4');
+                
+                console.log('WebM support:', canPlayWebm);
+                console.log('MP4 support:', canPlayMp4);
+                
+                if (!canPlayWebm && !canPlayMp4) {
+                    video.style.display = 'none';
+                    fallbackMessage.style.display = 'block';
+                    return false;
+                }
+                return true;
+            }
+
+            if (!checkVideoSupport()) {
+                return;
+            }
+
+            // Initialize video
+            video.volume = 1;
+            video.controls = false;
+            video.playsInline = true;
+
+            // Show loading indicator
+            loadingIndicator.style.display = 'block';
+
+            // Video loading events
+            video.addEventListener('loadedmetadata', () => {
+                console.log('Video metadata loaded');
+                loadingIndicator.style.display = 'none';
+                timeDisplay.textContent = `0:00 / ${Math.floor(video.duration / 60)}:${Math.floor(video.duration % 60).toString().padStart(2, '0')}`;
+            });
+
+            video.addEventListener('canplay', () => {
+                console.log('Video can play');
+                loadingIndicator.style.display = 'none';
+            });
+
+            // Play/Pause functionality
+            playPauseBtn.addEventListener('click', () => {
+                if (video.paused) {
+                    const playPromise = video.play();
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log('Video started playing');
+                            playPauseBtn.innerHTML = '<i class="bi bi-pause-fill"></i>';
+                        }).catch(error => {
+                            console.error('Error playing video:', error);
+                            showError('Error playing video: ' + error.message);
+                            // Fallback to native controls if custom controls fail
+                            video.controls = true;
+                        });
+                    }
+                } else {
+                    video.pause();
+                    playPauseBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+                }
+            });
+
+            // Volume control
+            volumeSlider.addEventListener('input', (e) => {
+                video.volume = e.target.value;
+                updateVolumeIcon();
+            });
+
+            muteBtn.addEventListener('click', () => {
+                video.muted = !video.muted;
+                updateVolumeIcon();
+            });
+
+            function updateVolumeIcon() {
+                if (video.muted || video.volume === 0) {
+                    muteBtn.innerHTML = '<i class="bi bi-volume-mute-fill"></i>';
+                    volumeSlider.value = 0;
+                } else if (video.volume < 0.5) {
+                    muteBtn.innerHTML = '<i class="bi bi-volume-down-fill"></i>';
+                } else {
+                    muteBtn.innerHTML = '<i class="bi bi-volume-up-fill"></i>';
+                }
+            }
+
+            // Progress bar
+            video.addEventListener('timeupdate', () => {
+                if (!isNaN(video.duration)) {
+                    const progress = (video.currentTime / video.duration) * 100;
+                    progressBar.style.width = progress + '%';
+                    
+                    const currentMinutes = Math.floor(video.currentTime / 60);
+                    const currentSeconds = Math.floor(video.currentTime % 60);
+                    const durationMinutes = Math.floor(video.duration / 60);
+                    const durationSeconds = Math.floor(video.duration % 60);
+                    
+                    timeDisplay.textContent = `${currentMinutes}:${currentSeconds.toString().padStart(2, '0')} / ${durationMinutes}:${durationSeconds.toString().padStart(2, '0')}`;
+                }
+            });
+
+            // Click on progress bar to seek
+            progressContainer.addEventListener('click', (e) => {
+                const rect = progressContainer.getBoundingClientRect();
+                const pos = (e.clientX - rect.left) / rect.width;
+                video.currentTime = pos * video.duration;
+            });
+
+            // Fullscreen
+            fullscreenBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    video.requestFullscreen().catch(error => {
+                        console.error('Error entering fullscreen:', error);
+                        showError('Error entering fullscreen: ' + error.message);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+
+            // Update play/pause button when video ends
+            video.addEventListener('ended', () => {
+                playPauseBtn.innerHTML = '<i class="bi bi-play-fill"></i>';
+            });
+
+            // Error handling
+            video.addEventListener('error', (e) => {
+                console.error('Video error:', video.error);
+                showError('Error loading video: ' + video.error.message);
+                loadingIndicator.style.display = 'none';
+                
+                // Try to load the alternative format
+                if (video.error.code === 4) { // MEDIA_ERR_SRC_NOT_SUPPORTED
+                    const currentSource = video.currentSrc;
+                    if (currentSource.includes('.webm')) {
+                        video.src = 'video/wednesday2008 Trailer.mp4';
+                        video.load();
+                    } else if (currentSource.includes('.mp4')) {
+                        video.src = 'video/theboys.webm';
+                        video.load();
+                    }
+                }
+            });
+
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+                setTimeout(() => {
+                    errorMessage.style.display = 'none';
+                }, 5000);
+            }
+
+            // Keyboard controls
+            document.addEventListener('keydown', (e) => {
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    playPauseBtn.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
